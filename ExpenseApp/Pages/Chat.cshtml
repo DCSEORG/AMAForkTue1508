@@ -1,0 +1,120 @@
+@page
+@model ChatModel
+@{
+    ViewData["Title"] = "Chat Assistant";
+}
+
+<div class="container mt-4">
+    @if (!Model.ChatEnabled)
+    {
+        <div class="alert alert-info">
+            <h4>Chat UI is not enabled</h4>
+            <p>To enable the AI chat assistant, set <code>GenAI:EnableChatUI</code> to <code>true</code> in your configuration and deploy the GenAI resources.</p>
+            <p>Update the <code>deploy.sh</code> script to set <code>INCLUDE_CHAT_UI="true"</code> and redeploy.</p>
+            <a href="/Index" class="btn btn-primary">Back to Expenses</a>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">💬 Expense Assistant</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>AI Assistant:</strong> Ask me anything about your expenses or ask me to help manage them!
+                </div>
+                
+                <div id="chat-container" class="mb-3" style="height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; background-color: #f8f9fa;">
+                    <div class="chat-message assistant-message mb-3">
+                        <strong>Assistant:</strong> Hello! I'm your expense management assistant. I can help you:
+                        <ul>
+                            <li>View your expenses</li>
+                            <li>Create new expense entries</li>
+                            <li>Check expense status</li>
+                            <li>Filter expenses by category or date</li>
+                        </ul>
+                        How can I help you today?
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="user-input" class="form-control" placeholder="Type your message here..." />
+                    <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+                </div>
+
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <strong>Example queries:</strong><br/>
+                        • "Show me all my submitted expenses"<br/>
+                        • "Create a travel expense for £45.50 from yesterday"<br/>
+                        • "What's the status of my recent expenses?"
+                    </small>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const container = document.getElementById('chat-container');
+            
+            // Add user message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'chat-message user-message mb-3 text-end';
+            userDiv.innerHTML = `<strong>You:</strong> ${escapeHtml(message)}`;
+            container.appendChild(userDiv);
+            
+            // Clear input
+            input.value = '';
+            
+            // Simulate AI response (in production, this would call the Azure OpenAI API)
+            setTimeout(() => {
+                const assistantDiv = document.createElement('div');
+                assistantDiv.className = 'chat-message assistant-message mb-3';
+                assistantDiv.innerHTML = `<strong>Assistant:</strong> I'm a demo chat interface. In production, I would connect to Azure OpenAI with function calling to help you manage expenses. Your message was: "${escapeHtml(message)}"`;
+                container.appendChild(assistantDiv);
+                container.scrollTop = container.scrollHeight;
+            }, 1000);
+            
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Allow Enter key to send message
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+    
+    <style>
+        .chat-message {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .assistant-message {
+            background-color: #e3f2fd;
+            text-align: left;
+        }
+        
+        .user-message {
+            background-color: #c8e6c9;
+        }
+    </style>
+}
